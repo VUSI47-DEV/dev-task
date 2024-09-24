@@ -57,7 +57,7 @@ export default function Home() {
   const [cityInformation, setCityInformation] = useState<City>();
   const [isDark, setIsDark] = useState<boolean>(false);
 
-  const [city, setCity] = useState<string>("cape town");
+  const [city, setCity] = useState<string>("");
 
   const getData = async () => {
     try {
@@ -146,13 +146,18 @@ export default function Home() {
               />
               <input
                 type="text"
-                className="border-slate-950 w-[803px] h-[62px] rounded-[40px] px-20"
+                className="border-gray-400 w-[803px] h-[62px] rounded-[40px] px-20 "
                 placeholder="Search for your preferred city..."
                 onChange={(e) => setCity(e.target.value)}
                 value={city}
+                style={{ backgroundColor: "var(--input-bg)", color: "var(--text)" }}
               />
             </div>
-            <button className="dark text-white font-bold w-[292px] h-[62px] rounded-[40px] flex items-center justify-center gap-5">
+            <button
+             style={{ backgroundColor: "var(--green)" }}
+             className="dark text-white font-bold w-[292px] h-[62px] rounded-[40px] flex items-center justify-center gap-5"
+             onClick={getData}
+             >
               <Image
                 src={"/current location icon.png"}
                 width={35}
@@ -163,6 +168,7 @@ export default function Home() {
             </button>
           </form>
         </div>
+        
 
         <div className="h-screen w-full flex items-center justify-center mx-auto ">
           {weatherData.length > 0 ? (
@@ -197,7 +203,7 @@ export default function Home() {
               </div>
 
               {/* Five Days Forecast */}
-              <div className="col-span-3 row-span-5 bg-gray-300 dark:bg-gray-700 rounded-[30px] flex flex-col justify-center items-center text-[#292929] shadow-box-custom">
+              <div className="col-span-3 row-span-5 bg-gray-300 dark:bg-gray-800 shadow-box-custom  rounded-[30px] flex flex-col justify-center items-center text-[#292929] shadow-box-custom">
                 <h4 className="text-md text-2xl font-bold">5 Days Forecast:</h4>
                 <div>
                   {getFiveDayForecast().map((weather, index) => (
