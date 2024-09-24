@@ -2,7 +2,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+ Run application the development server:
 
 ```bash
 
@@ -39,6 +39,6 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 # dev-task
 
-** To run application **
-*** npm install ***
-*** npm run dev ***
+## To run application 
+# npm install
+# npm run dev
