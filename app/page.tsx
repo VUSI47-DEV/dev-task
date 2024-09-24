@@ -1,101 +1,240 @@
+"use client";
+import CurrentDateAndTime from "./components/CurrentDateAndTime";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import HourlyForecast from "./components/HourlyForecast";
+import FiveDayForecast from "./components/FiveDayForecast";
+import CurrentWeather from "./components/CurrentWeather";
 import Image from "next/image";
+import Switch from "@mui/material/Switch";
+
+interface City {
+  country: string;
+  id: number;
+  name: string;
+  population: number;
+  sunrise: number;
+  sunset: number;
+  timezone: number;
+}
+
+interface Weather {
+  id: number;
+  description: string;
+  icon: string;
+  main: string;
+}
+
+interface WeatherInformation {
+  dt_txt: string;
+  dt: number;
+  main: {
+    feels_like: number;
+    grnd_level: number;
+    humidity: number;
+    pressure: number;
+    sea_level: number;
+    temp: number;
+    temp_kf: number;
+    temp_max: number;
+    temp_min: number;
+  };
+  weather: Weather[];
+  clouds: {
+    all: number;
+  };
+  wind: {
+    deg: number;
+    gust: number;
+    speed: number;
+  };
+  visibility: number;
+  pop: number;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [weatherData, setWeatherData] = useState<WeatherInformation[]>([]);
+  const [cityInformation, setCityInformation] = useState<City>();
+  const [isDark, setIsDark] = useState<boolean>(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const [city, setCity] = useState<string>("cape town");
+
+  const getData = async () => {
+    try {
+      const res = await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=02364c7373ab65999334aa6c3121e0fd`
+      );
+      setWeatherData(res.data.list);
+      setCityInformation(res.data.city);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const convertUnixTimeStamp = (time: number) => {
+    const date = new Date(time * 1000);
+    const hours = date.getUTCHours().toString().padStart(2, "0");
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+
+    return `${hours}:${minutes}`;
+  };
+
+  const getCurrentTime = (currTime: string) => {
+    if (!currTime) return "";
+    const time = currTime?.split(" ");
+    return time[1];
+  };
+
+  const getDateNoTime = (date: string) => {
+    const dt = date.split(" ");
+    const newDate = new Date(dt[0]).toString().split(" ");
+
+    return `${newDate[0]}, ${newDate[2]} ${newDate[1]} `;
+  };
+
+  const getHour = (time: string) => {
+    const hour = time.split(" ");
+    return hour[1];
+  };
+
+  const getFiveDayForecast = () => {
+    return weatherData.filter((forecast) => forecast.dt_txt.includes("12:00:00"));
+  };
+
+  useEffect(() => {
+    if (city) {
+      getData();
+    }
+  }, [city]);
+
+  const label = { inputProps: { "aria-label": "Switch demo" } };
+
+  return (
+    <div className={`${isDark ? "dark" : ""}`}>
+      <div className={`p-10 h-screen w-full ${isDark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+        {/* Creating search */}
+        <div className=" px-10">
+          <form
+            className="flex justify-between items-center"
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div>
+              <Switch
+                sx={{ backgroundColor: "transparent" }}
+                {...label}
+                size="medium"
+                color="default"
+                checked={isDark}
+                onChange={(e) => setIsDark(e.target.checked)}
+              />
+              {isDark ? (
+                <p className="font-bold text-lg">Dark Mode</p>
+              ) : (
+                <p>Light Mode</p>
+              )}
+            </div>
+            <div className="flex items-center ">
+              <Image
+                width={30}
+                height={30}
+                src={"/light/search 1.png"}
+                alt="search-icon"
+                className="absolute left-64 cursor-pointer"
+                onClick={getData}
+              />
+              <input
+                type="text"
+                className="border-slate-950 w-[803px] h-[62px] rounded-[40px] px-20"
+                placeholder="Search for your preferred city..."
+                onChange={(e) => setCity(e.target.value)}
+                value={city}
+              />
+            </div>
+            <button className="dark text-white font-bold w-[292px] h-[62px] rounded-[40px] flex items-center justify-center gap-5">
+              <Image
+                src={"/current location icon.png"}
+                width={35}
+                height={35}
+                alt=""
+              />
+              <p className="font-bold text-2xl">Current Weather</p>
+            </button>
+          </form>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="h-screen w-full flex items-center justify-center mx-auto ">
+          {weatherData.length > 0 ? (
+            <div className="grid h-full w-full grid-cols-10 grid-rows-5 gap-6 p-5">
+              <div className="col-span-3 row-span-2 bg-gray-300 dark:bg-gray-700 shadow-box-custom rounded-[30px] flex justify-center items-center flex-col text-center drop-shadow-md">
+                {cityInformation && (
+                  <CurrentDateAndTime
+                    city={cityInformation.name}
+                    date={getDateNoTime(weatherData[0].dt_txt)}
+                    time={getCurrentTime(weatherData[0]?.dt_txt)}
+                  />
+                )}
+              </div>
+              <div className="col-span-6 row-span-3 bg-layout-gradient dark:bg-gray-800 shadow-box-custom rounded-[30px] flex relative">
+                <CurrentWeather
+                  currentDesc={weatherData[0].weather[0].description}
+                  temp={weatherData[0]?.main.temp}
+                  weatherIcon={`http://openweathermap.org/img/wn/${weatherData[0].weather[0].icon}@2x.png`}
+                  date=""
+                  feelsLike={weatherData[0]?.main.feels_like}
+                  hummidity={weatherData[0]?.main.humidity}
+                  hummidityIcon=""
+                  pressure={weatherData[0]?.main.pressure}
+                  pressureIcon=""
+                  windSpeed={weatherData[0].wind.speed}
+                  windSpeedIcon=""
+                  uv={2}
+                  uvIcon=""
+                  sunrise={convertUnixTimeStamp(cityInformation?.sunrise)}
+                  sunset={convertUnixTimeStamp(cityInformation?.sunset)}
+                />
+              </div>
+
+              {/* Five Days Forecast */}
+              <div className="col-span-3 row-span-5 bg-gray-300 dark:bg-gray-700 rounded-[30px] flex flex-col justify-center items-center text-[#292929] shadow-box-custom">
+                <h4 className="text-md text-2xl font-bold">5 Days Forecast:</h4>
+                <div>
+                  {getFiveDayForecast().map((weather, index) => (
+                    <FiveDayForecast
+                      key={index}
+                      date={getDateNoTime(weather.dt_txt)}
+                      temp={weather.main.temp}
+                      weatherIcon={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Hourly Forecast */}
+              <div className="col-span-6 row-span-7 bg-gray-300 dark:bg-gray-700 shadow-box-custom rounded-[30px] pl-12 pr-12 py-3">
+                <h3 className="text-center text-[#292929] dark:text-white font-bold text-xl p-2">
+                  Hourly Forecast
+                </h3>
+                <div className="flex justify-evenly">
+                  {weatherData.slice(0, 5).map((weather, index: number) => (
+                    <div key={index}>
+                      <HourlyForecast
+                        temp={weather.main.temp}
+                        windSpeed={weather.wind.speed}
+                        weatherImage={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                        time={getHour(weather.dt_txt)}
+                        windImage="/navigation 1.png"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>No weather data</div>
+          )}
+        </div>
+      </div>
     </div>
-  );
-}
+  )}

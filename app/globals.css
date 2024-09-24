@@ -2,11 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
+.light {
+  /* --background: linear-gradient(113deg, #FFF 0.28%, rgba(70, 97, 115, 0.00) 178.65%);; */
+  --background:linear-gradient(113deg, #a39d9d 0.28%, rgba(70, 97, 115, 0.00) 178.65%);
   --foreground: #171717;
+  --green:#4CBB17;
+  --input-bg:#444;
+  --text:#292929;
 }
-
+.dark{
+  --green:#4CBB17;
+  --input-bg:#444;
+  --text:#fff;
+  --background: linear-gradient(110deg, #383838 0%, rgba(158, 158, 158, 0.00) 71.82%);
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -16,7 +25,7 @@
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  /* background: var(--background); */
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -24,4 +33,10 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+.my-layout{
+  background: linear-gradient(113deg, #a39d9d 0.28%, rgba(70, 97, 115, 0.00) 178.65%)!important;
+  height: auto;
+  width: 100%;
 }
